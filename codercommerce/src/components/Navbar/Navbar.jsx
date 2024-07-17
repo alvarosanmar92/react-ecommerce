@@ -1,31 +1,91 @@
-import React, { useState } from 'react'
-import './Navbar.css'
+import { Link, useNavigate } from "react-router-dom";
+import SearchBar from "../searchBar/SearchBar";
+import { useSelector } from "react-redux";
 
-import logo from '../Assets/logo.png'
-import cart_icon from '../Assets/cart_icon.png'
-import { Link } from 'react-router-dom'
 
-export const Navbar = () => {
-    const [menu,setMenu] = useState ("shop")
-  return (
-    <div className='navbar'>
-        <div className="nav-logo">
-        <img src={logo} alt="Logo tienda" />   
-        <p>CoderCommerce</p> 
-        </div>
-        <ul className="nav-menu">
-            <li onClick={()=>{setMenu("shop")}}><Link style={{textDecoration: 'none'}}to='/'>Tienda</Link>{menu==="shop"?<hr/>:<></>}</li>
-            <li onClick={()=>{setMenu("mens")}}><Link style={{textDecoration: 'none'}}to='/mens'>Hombre</Link>{menu==="mens"?<hr/>:<></>}</li>
-            <li onClick={()=>{setMenu("womens")}}><Link style={{textDecoration: 'none'}}to='/womens'>Mujer</Link>{menu==="womens"?<hr/>:<></>}</li>
-            <li onClick={()=>{setMenu("kids")}}><Link style={{textDecoration: 'none'}}to='/kids'>Niño</Link>{menu==="kids"?<hr/>:<></>}</li>
+const Navbar = () => {
+    // get user from localStorage 
+    const user = JSON.parse(localStorage.getItem('users'));
+
+    // navigate 
+    const navigate = useNavigate();
+
+    // logout function 
+    const logout = () => {
+        localStorage.clear('users');
+        navigate("/login")
+    }
+
+    // CartItems
+    const cartItems = useSelector((state) => state.cart);
+
+    // navList Data
+    const navList = (
+        <ul className="flex space-x-3 text-white font-medium text-md px-5 ">
+            {/* Home */}
+            <li>
+                <Link to={'/'}>Home</Link>
+            </li>
+
+            {/* All Product */}
+            <li>
+                <Link to={'/allproduct'}>All Product</Link>
+            </li>
+
+            {/* Signup */}
+            {!user ? <li>
+                <Link to={'/signup'}>Signup</Link>
+            </li> : ""}
+
+            {/* Signup */}
+            {!user ? <li>
+                <Link to={'/login'}>Login</Link>
+            </li> : ""}
+
+            {/* User */}
+            {user?.role === "user" && <li>
+                <Link to={'/user-dashboard'}>User</Link>
+            </li>}
+
+            {/* Admin */}
+            {user?.role === "admin" && <li>
+                <Link to={'/admin-dashboard'}>Admin</Link>
+            </li>}
+
+            {/* logout */}
+            {user && <li className=" cursor-pointer" onClick={logout}>
+                logout
+            </li>}
+
+            {/* Cart */}
+            <li>
+                <Link to={'/cart'}>
+                    Cart({cartItems.length})
+                </Link>
+            </li>
         </ul>
-        <div className="nav-login-cart">
-            <Link to='/login'><button>Login</button></Link>
-            <Link to='/cart'><img src={cart_icon} alt="" /></Link>
-            <div className="nav-cart-count">0</div>
-        </div>
-    </div>
-  )
+    )
+    return (
+        <nav className="bg-pink-600 sticky top-0">
+            {/* main  */}
+            <div className="lg:flex lg:justify-between items-center py-3 lg:px-3 ">
+                {/* left  */}
+                <div className="left py-3 lg:py-0">
+                    <Link to={'/'}>
+                        <h2 className=" font-bold text-white text-2xl text-center">CoderCommerce</h2>
+                    </Link>
+                </div>
+
+                {/* right  */}
+                <div className="right flex justify-center mb-4 lg:mb-0">
+                    {navList}
+                </div>
+
+                {/* Search Bar  */}
+                <SearchBar />
+            </div>
+        </nav>
+    );
 }
 
-export default Navbar
+export default Navbar;
